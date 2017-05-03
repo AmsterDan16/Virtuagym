@@ -17,9 +17,17 @@ switch($q){
     case "getExercises":
         GetExercises($con);
         break;
+    case "getMuscleGroups":
+        GetMuscleGroups($con);
+        break;
     case "submitWorkout":
         $workout = $_POST['workout'];
         SubmitWorkout($con, $workout);
+        break;
+    case "submitExercise":
+        $muscle_id = $_POST['muscle_id'];
+        $exercise = $_POST['exercise'];
+        SubmitExercise($con, $muscle_id, $exercise);
         break;
     case "deleteWorkout":
         $plan_id = $_POST['plan_id'];
@@ -102,6 +110,25 @@ function GetExercises($con){
 }
 
 /**
+ * retrieves the list of muscle groups
+ * @param {String} sql connection 
+ * @return {json} json string of muscle groups
+ */
+function GetMuscleGroups($con){
+    $sql = "SELECT id, name FROM muscle_groups;";
+    
+    $arr = array();
+    if($result = mysqli_query($con, $sql)){
+        while($row = mysqli_fetch_assoc($result)) {
+            $arr[] = $row;
+        }
+        echo json_encode($arr);
+    }
+    
+    mysqli_close($con);
+}
+
+/**
  * submits workout
  * @param {String} sql connection 
  * @param {json} json string
@@ -121,6 +148,24 @@ function SubmitWorkout($con, $workout_json){
         mysqli_close($con);
     }
   
+}
+
+/**
+ * submits exercise
+ * @param {String} sql connection 
+ * @param {Integer} muscle group id
+ * @param {String} name of exercise
+ * @return
+ */
+function SubmitExercise($con, $muscle_id, $exercise){
+    $sql = "INSERT INTO exercises (muscle_group_id, exercise_name) VALUES (" . $muscle_id . ", '" . $exercise ."');";
+    
+    if(mysqli_query($con, $sql)){
+        echo "Success!";
+    }else{
+        echo "Error: " . $sql . "<br>" . mysqli_error($con);  
+    }
+    mysqli_close($con);
 }
 
 /**

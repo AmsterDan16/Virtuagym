@@ -8,15 +8,36 @@
     </head>
     <body>
         <div id="header"><h1>Workout Plans</h1></div>
-        
-        <div class="form_btn" id="add_plan">(+) Add Plan</div>
+        <div id="add_btn_container">
+            <button class="form_btn" id="add_plan">(+) Add Plan</button>
+            <button class="form_btn" id="add_exercise">(+) Add Exercise</button>
+        </div>
+        <div id="new_exercise_form">
+            <form action="">
+                <div>
+                    <table id="exercise_options_tbl">
+                        <tr>
+                            <td>
+                                <select class="option_select" id="muscle_select" required>
+                                    <option value="-1" selected>select muscle group</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input id="exercise_name" type="text" placeholder="Exercise Name" value=""/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="form_btn" id="submit_exercise">Save</div>
+            </form>
+        </div>
         <div id="new_plan_form">
             <form action="">
                 <div>
                     <table id="plan_info_tbl">
                         <tr>
                             <td>
-                                <select id="user_select" name="user_select" required>
+                                <select class="option_select" id="user_select" name="user_select" required>
                                     <option value="-1" selected>select user</option>
                                 </select>
                             </td>
@@ -51,9 +72,13 @@
                     </table>
                 </div>  
                 <div id="button_container">
-                    <div class="form_btn" id="add_day">(+) Add Day</div>
-                    <div class="form_btn" id="reset_form">Reset</div>
-                    <div class="form_btn" id="submit_exercise">Save</div>
+                    <table>
+                        <tr>
+                            <td><div class="form_btn" id="add_day">(+) Add Day</div></td>
+                            <td><div class="form_btn" id="reset_form">Reset</div></td>
+                            <td><div class="form_btn" id="submit_workout">Save</div></td>
+                        </tr>
+                    </table>   
                 </div>
             </form>
         </div>

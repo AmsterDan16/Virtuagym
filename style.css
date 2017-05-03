@@ -10,6 +10,8 @@
 
 body{
  background-color:#fcf0e9;   
+ padding:0;
+ margin:0;
 }
 
 #header{
@@ -97,26 +99,70 @@ body{
      padding-left:20px;
     }   
     
+    #add_btn_container{
+     width:50%;
+     margin:0 auto; 
+     height:50px;
+    }
+        #add_btn_container div{
+         display: inline;
+        }
+    
+    #add_plan{
+     float: left;  
+     width: 45%;
+     height: 40px;
+     font-size: 15px;
+        
+    }
+    
+    #add_exercise{
+     float:right;  
+     width:45%;
+     height:40px;
+     font-size: 15px;
+    }
+    
     #new_plan_form{
      padding-top: 20px;
-     display: none;   
+     display: none;  
+     width:70%;
+     margin:0 auto;
+    }
+    
+    #new_exercise_form{
+     display:none;
+     width:70%;
+     margin:0 auto;
     }
 
+    #exercise_options_tbl{
+     table-layout: fixed;
+     margin: 0 auto;
+     padding-top:10px;
+     padding-bottom:10px;
+    }
+    
     #plan_info_tbl{
      margin: 0 auto;
     }
-
-    #user_select{
+    
+    .option_select{
      width:200px;
      height:30px;
-     font-size:15px;
+     font-size:15px;    
     }
 
+    #exercise_name{
+     width: 200px;
+     height: 22px;
+     font-size: 17px;   
+    }
+    
     #plan_name{
      width: 200px;
-     height: 30px;
-     font-size: 20px;
-
+     height: 22px;
+     font-size: 17px;
     }
 
     .exercise_day{
@@ -127,7 +173,7 @@ body{
      border:none;
      border-bottom: 1px dotted #000000;
      height:30px;
-     font-size: 20px;
+     font-size: 17px;
      background-color:#fcf0e9;
      margin-left: 5px;
      margin-bottom: 5px;
@@ -159,23 +205,36 @@ body{
         .form_btn:hover{
          background-color:#71aff0;    
         }
+    .form_btn_disabled{
+     background-color: gray;
+    }
 
     #button_container{
-     display:inline; 
      margin-top:15px;
+     margin: 0 auto;
     }
-        #button_container div{
+        #button_container table{
+         table-layout: fixed;
+         padding-top:20px;
+        }
+        #button_container table td{
+         width:200px;
+        }
+        #button_container table td div{
+         width:80%;
+        }
+/*
+        #button_container > div{
          margin-top:5px;
          margin-bottom:5px;
+         width: calc(100% / 3);
+         display:inline-block;
+         vertical-align: top;
         }
+*/
 
     .userPlan{
      max-width: 600px;
-    }
-    
-    #new_plan_form{
-     width:70%;
-     margin:0 auto;
     }
     
     #plan_title_container div{
@@ -228,13 +287,16 @@ body{
 
 
 @media screen and (max-width:768px){
-    #header h1{
-     padding-left:20px;
-     font-size: 30px;
-     text-align: center;
+    #header{
+     height:50px;
     }
+        #header h1{
+         padding-left:20px;
+         font-size: 30px;
+         text-align: center;
+        }
     
-    #add_plan{
+    #add_btn_container{
      display:none;   
     }
     
@@ -244,6 +306,10 @@ body{
     */
     #new_plan_form{
      display: none;    
+    }
+    
+    #new_exercise_form{
+     display:none;   
     }
     
     .userPlan{

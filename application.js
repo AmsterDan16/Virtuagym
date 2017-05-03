@@ -44,7 +44,7 @@ function HasValidWorkoutEntries(){
  * @param 
  * @return 
  */
-function ResetForm(){
+function ResetPlanForm(){
     //remove all but the first instance of the class
     $('.exercise_tbl').slice(1).remove();
     //clear rest of the inputs
@@ -54,6 +54,19 @@ function ResetForm(){
     $('.day_name').val("");
     $('#plan_name').val("");
     $('#new_plan_form').slideUp();
+    $('#add_exercise').prop("disabled", false);
+}
+
+/**
+ * resets entry form
+ * @param 
+ * @return 
+ */
+function ResetExerciseForm(){
+    $('#muscle_select').val(-1); 
+    $('#exercise_name').val("");
+    $('#new_exercise_form').slideUp();
+    $('#add_plan').prop("disabled", false);
 }
 
 /**
@@ -62,6 +75,9 @@ function ResetForm(){
  * @return
  */
 function FormatPlanList(plans){
+    //clear current rows if they exist
+    $('.plan_row').slice().remove();
+    
     var ob = JSON.stringify(plans);
     ob = JSON.parse(plans);
     var newPlan, row;
@@ -146,6 +162,21 @@ function PopulateExercises(data){
 }
 
 /**
+ * populates the muscle options in the select list
+ * @param {String} data
+ * @return
+ */
+function PopulateMuscleGroups(data){
+   var ob = JSON.stringify(data);
+    ob = JSON.parse(data);
+    var row;
+    for(var i = 0; i < ob.length; i++){
+        row = ob[i];
+        $("#muscle_select").append($("<option value=" + row.id + ">" + row.name + "</option>"));
+    } 
+}
+
+/**
  * click event to show entry form
  * @return
  */
@@ -153,11 +184,31 @@ $('#add_plan').click(function(){
     var form = $('#new_plan_form');
     var ex_control = form.find($('.exercise_selection'));
     var user_control = $('#user_select');
-    if(ex_control[0].options.length == 0 && user_control[0].options.length == 1){
+    var add_exercise_btn = $('#add_exercise');
+    if(ex_control[0].options.length == 0 || user_control[0].options.length == 1){
         data.getPlanOptions();
     }
+    
+    add_exercise_btn.prop("disabled",!add_exercise_btn.prop("disabled"));
     $('#new_plan_form').slideToggle();
     $('.exercise_tbl').last().find($('.day_name')).focus();
+});
+
+/**
+ * click event to show exercise entry form
+ * @return
+ */
+$('#add_exercise').click(function(){
+    var form = $('#new_exercise_form');
+    var muscles_control = $('#muscle_select');
+    var add_plan_btn = $('#add_plan');
+    if(muscles_control[0].options.length == 1){
+        data.getMuscleGroupOptions();
+    }
+    
+    add_plan_btn.prop("disabled",!add_plan_btn.prop("disabled"));
+    $('#new_exercise_form').slideToggle();
+    $('#exercise_options_tbl').find($('#exercise_name')).focus();
 });
 
 /**
@@ -184,7 +235,7 @@ $('#userPlanTable').on('click', '.userPlan', function(){
  * @return
  */
 $('#reset_form').click(function(){
-    ResetForm();
+    ResetPlanForm();
 });
 
 /**
@@ -226,13 +277,13 @@ $('.transfer_selection').click(function(){
  * click event to submit created workout
  * @return
  */
-$('#submit_exercise').click(function(){
+$('#submit_workout').click(function(){
     //check the last workout day for valid entries
     var user = $('#user_select');
     if(!HasValidWorkoutEntries()  || user.val() == -1){
         alert("Please pick a user, add a name and atleast 1 exercise to the final day.");
     }else{
-        var user_id = $('#user_select').val();
+        var user_id = user.val();
         var plan_name = $('#plan_name').val();
         var day_name, exercises, exercises_control;
         var workout, current_day;
@@ -246,7 +297,21 @@ $('#submit_exercise').click(function(){
         });
         workout = new Workout(user_id, plan_name, days); 
         data.submitWorkout(workout);
-    //on success, email user
+    }
+});
+
+/**
+ * click event to submit created exercise
+ * @return
+ */
+$('#submit_exercise').click(function(){
+    //check the last workout day for valid entries
+    var muscle_group = $('#muscle_select').val();
+    var exercise = $('#exercise_name').val()
+    if(exercise == ""  || muscle_group == -1){
+        alert("Please pick a muscle group and enter the name of the exercise!");
+    }else{
+        data.submitExercise(muscle_group, exercise);
     }
 });
 
@@ -258,33 +323,45 @@ var data = {
         });
     },
     getPlanOptions: function(){
-        
-        $.get("api.php?q=getUsers", function(data, status){
-            PopulateUserDropdown(data);   
-        });
-        $.get("api.php?q=getExercises", function(data, status){
-            PopulateExercises(data);   
+        if($('#user_select')[0].options.length == 1){
+            $.get("api.php?q=getUsers", function(data, status){
+                PopulateUserDropdown(data);   
+            });
+        }
+        var form = $('#new_plan_form');
+        var ex_control = form.find($('.exercise_selection'));
+        if(ex_control[0].options.length == 0){
+            $.get("api.php?q=getExercises", function(data, status){
+                PopulateExercises(data);   
+            });
+        }
+    },
+    getMuscleGroupOptions: function(){
+        $.get("api.php?q=getMuscleGroups", function(data, status){
+            PopulateMuscleGroups(data);   
         });
     },
     submitWorkout: function(workout){
         $.post('api.php?q=submitWorkout', { workout: JSON.stringify(workout) }, function(response) {
-            console.log(response);
-            ResetForm();
+            ResetPlanForm();
             data.notifyUser("Add", workout.user_id);
-            alert("Success!");
-            setTimeout(function(){
-                location.reload();
-            },1000);
+            alert(workout.plan_name + " added to active workouts!");
+            data.init();
+        });
+    },
+    submitExercise: function(muscle_group, exercise){
+        $.post('api.php?q=submitExercise', { muscle_id: muscle_group, exercise: exercise }, function(response) {
+            alert(exercise + " added to exercise options!");
+            ResetExerciseForm();
+            //refresh exercise list on plan entry form
+            $('.exercise_selection').val([]);
         });
     },
     deleteWorkout: function(plan_id){
         $.post('api.php?q=deleteWorkout', { plan_id: plan_id }, function(response) {
-            console.log(response);
             //data.notifyUser("Remove");
-            alert("Success!");
-            setTimeout(function(){
-                location.reload();
-            },1000);
+            alert("Workout removed.");
+            data.init();
         });
     },
     notifyUser: function(change, user_id){
