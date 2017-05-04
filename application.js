@@ -350,6 +350,7 @@ var data = {
     submitWorkout: function(workout){
         $.post('api.php?q=submitWorkout', { workout: JSON.stringify(workout) }, function(response) {
             ResetPlanForm();
+            console.log(response);
             data.notifyUser("Add", workout.user_id);
             alert(workout.plan_name + " added to active workouts!");
             data.init();

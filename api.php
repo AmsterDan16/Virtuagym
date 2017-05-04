@@ -188,15 +188,12 @@ function SubmitWorkoutDays($con, $days, $plan_id){
 
         if(mysqli_query($con, $sql)){
             $day_id = mysqli_insert_id($con);
-            $sql="";
+            $sql="INSERT INTO workout_exercises (exercise_id, plan_id, day_id) VALUES";
             foreach($exercises as $exercise){
-                $sql.="INSERT INTO workout_exercises (exercise_id, plan_id, day_id) VALUES (".$exercise.",".$plan_id.",".$day_id.");";   
+                $sql.=" (".$exercise.",".$plan_id.",".$day_id."),";   
             }
-            if(mysqli_multi_query($con, $sql)){
-                echo "Workout Day Added!";
-            }else{
-                echo "Error: " . $sql . "<br>" . mysqli_error($con); 
-            }
+            $sql = rtrim($sql,',') . ";";
+            mysqli_multi_query($con, $sql);
         }
     }
     mysqli_close($con);
@@ -234,8 +231,10 @@ function NotifyUser($con, $user_id){
     $sql = "SELECT email FROM users WHERE id=".$user_id.";";
     
     if($result = mysqli_query($con, $sql)){
+        $row = mysqli_fetch_assoc($result);
         $msg = "Your workout plan has been added! Thanks for using the site.\n -Virtuagym";
-        mail($result, "New Workout Plan", $msg);
+        mail($row["email"], "New Workout Plan", $msg);
+        echo "An email has been sent to " . $row["email"];
     }else{
         echo "Error occurred.";   
     }
