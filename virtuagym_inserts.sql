@@ -13,7 +13,9 @@ INSERT INTO `muscle_groups` (`id`, `name`) VALUES
 (2, 'Chest'),
 (3, 'Shoulders'),
 (4, 'Abs'),
-(5, 'Calf Raise');
+(5, 'Lower Legs'),
+(6, 'Biceps'),
+(7, 'Upper Legs');
 
 -- --------------------------------------------------------
 
