@@ -47,7 +47,7 @@
                         </tr>
                     </table>
                 </div>
-                <div id="directions"><p>Make you selection(s) from the list on the right, and press the arrow when you're ready to transfer your choices.</p></div>
+                <div id="directions"><p>Make your selection(s) from the list on the right, and press the arrow when you're ready to transfer your choices.</p></div>
                 <div class="exercise_day_container">
                     <table class="exercise_tbl">
                         <tr>
@@ -84,11 +84,11 @@
         </div>
         <div id="assignedPlans">
             <table id="userPlanTable"></table>
-            <div id="myModal" class="modal">
+            <div id="modal" class="modal">
               <!-- Modal content -->
               <div class="modal_content">
-                <span class="close_modal">&times;</span>
-                <p></p>
+                <span id="close_modal" class="close_modal">&times;</span>
+                <div id="modal_exercises_display"></div>
               </div>
             </div>
         </div>

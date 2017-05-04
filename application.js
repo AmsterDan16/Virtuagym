@@ -101,34 +101,31 @@ function FormatPlanList(plans){
 function ShowPlanDetails(details, plan_id){
     var ob = JSON.stringify(details);
     ob = JSON.parse(details);
-    var modal = $('#myModal');
+    var modal = $('#modal');
     //var span = $('.close_modal')[0];
-    var content = $('.modal_content');
-    var dom_list;
+    var content = $('#modal_exercises_display');
+    content.html("");
+    var plan_info;
     var row;
-    dom_list = "<ul>"
+    plan_info = "<h2 id='workout_name'>" + ob[0].name + "</h2>";
+    plan_info += "<p>Created by: " + ob[0].first_name + " " + ob[0].last_name + "</p>";
+    plan_info += ob[0].day_name + "<ul>";
+    var current_day = ob[0].day_id;
     for(var i = 0; i < ob.length; i++){
         row = ob[i];
-        dom_list += "<li><div>";
-        dom_list += "<h3>" + row.exercise_name + "</h3>";
-        dom_list += "</div></li>";
+        if(current_day != row.day_id){
+            current_day = row.day_id;
+            plan_info += "</ul>" + row.day_name + "<ul>";
+        }
+        plan_info += "<li><div>";
+        plan_info += "<h3>" + row.exercise_name + "</h3>";
+        plan_info += "</div></li>";
         
     }
-    dom_list += "</ul>";
-    content.append(dom_list);
-    modal.style.display = "block";
+    plan_info += "</ul>";
+    content.append(plan_info);
+    modal.css("display", "block");
 }
-
-//var span = $('.close_modal')[0];
-//span.click(function(event){
-//    $('#myModal').style.display = "none";
-//});
-//
-//window.click(function(event) {
-//    if (event.target == $('#myModal')) {
-//        $('#myModal').style.display = "none";
-//    }
-//});
 
 /**
  * populates the user options in the select list
@@ -175,6 +172,16 @@ function PopulateMuscleGroups(data){
         $("#muscle_select").append($("<option value=" + row.id + ">" + row.name + "</option>"));
     } 
 }
+
+/**
+ * click event to close the modal popup
+ * @return
+ */
+$(window).click(function(event) {
+    if(event.target.id == 'modal' || event.target.id == "close_modal") {
+        $('#modal').css("display", "none");
+    }
+});
 
 /**
  * click event to show entry form
@@ -229,7 +236,6 @@ $('#userPlanTable').on('click', '.userPlan', function(){
     data.getPlanDetails(plan_id);
 });
 
-
 /**
  * click event to reset entry form
  * @return
@@ -251,7 +257,7 @@ $('#add_day').click(function(){
         $('.exercise_tbl').first().clone(true, true).appendTo($('.exercise_day_container').last());
         $('.exercise_tbl').last().find($('.day_name')).focus();
         //clear the cloned fields
-        currentExerciseDay = $('.exercise_tbl').last();
+        var currentExerciseDay = $('.exercise_tbl').last();
         currentExerciseDay.find($('.day_name'))[0].value = "";
         currentExerciseDay.find($('.exercise_area'))[0].value = "";
     }
@@ -347,6 +353,8 @@ var data = {
             data.notifyUser("Add", workout.user_id);
             alert(workout.plan_name + " added to active workouts!");
             data.init();
+        }).fail(function(response) {
+            alert('Error: ' + response.responseText);
         });
     },
     submitExercise: function(muscle_group, exercise){
@@ -355,6 +363,8 @@ var data = {
             ResetExerciseForm();
             //refresh exercise list on plan entry form
             $('.exercise_selection').val([]);
+        }).fail(function(response) {
+            alert('Error: ' + response.responseText);
         });
     },
     deleteWorkout: function(plan_id){
@@ -362,6 +372,8 @@ var data = {
             //data.notifyUser("Remove");
             alert("Workout removed.");
             data.init();
+        }).fail(function(response) {
+            alert('Error: ' + response.responseText);
         });
     },
     notifyUser: function(change, user_id){
@@ -372,6 +384,8 @@ var data = {
     getPlanDetails: function(plan_id){
         $.get("api.php?q=getPlanDetails", { plan_id: plan_id }, function(data, status){
             ShowPlanDetails(data, plan_id);   
+        }).fail(function(response) {
+            alert('Error: ' + response.responseText);
         });
     }
 }

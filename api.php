@@ -250,14 +250,20 @@ function NotifyUser($con, $user_id){
  * @return
  */
 function GetPlanDetails($con, $plan_id){
-    $sql = "SELECT DISTINCT(exercises.exercise_name) FROM workout_exercises wk_exercise
+    $sql = "SELECT workouts.name, users.first_name, users.last_name, days.id AS 'day_id', days.day_name, exercises.exercise_name
+FROM workout_exercises wk_exercise
 LEFT JOIN workouts 
 ON wk_exercise.plan_id = workouts.id
+LEFT JOIN user_workouts 
+ON user_workouts.plan_id = workouts.id
+LEFT JOIN users
+ON users.id = user_workouts.user_id
 LEFT JOIN exercises
 ON exercises.id = wk_exercise.exercise_id
 LEFT JOIN days
 ON workouts.id = days.plan_id
-WHERE workouts.id=".$plan_id.";";
+WHERE workouts.id=".$plan_id." 
+ORDER BY days.id;";
     
     $arr = array();
     if($result = mysqli_query($con, $sql)){
@@ -265,6 +271,8 @@ WHERE workouts.id=".$plan_id.";";
             $arr[] = $row;
         }
         echo json_encode($arr);
+    }else{
+        echo "Error: " . $sql . "<br>" . mysqli_error($con);    
     }
     
     mysqli_close($con);
