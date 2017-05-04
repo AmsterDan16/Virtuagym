@@ -32,6 +32,7 @@ body{
 #userPlanTable{
  width:100%;
  margin:0 auto;
+ padding-bottom: 40px;
 }
 
 .userPlan{
@@ -311,4 +312,13 @@ body{
         .userPlan:hover{
          background-color:#f3d7c3;    
         }
+    .modal_content h2{
+     font-size:16px;
+    }
+    .modal_content p{
+     font-size:12px;
+    }
+    .modal_content h3{
+     font-size:12px;
+    }
 }
