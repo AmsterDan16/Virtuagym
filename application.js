@@ -24,7 +24,6 @@ function Day(name, exercises){
 
 /**
  * checks entry form for validity
- * @param 
  * @return true if valid, false otherwise
  */
 function HasValidWorkoutEntries(){
@@ -95,14 +94,14 @@ function FormatPlanList(plans){
 
 /**
  * formats and displays given workout plan details
- * @param {String} details
+ * @param {String} workout details
+ * @param {Integer} workout id
  * @return
  */
 function ShowPlanDetails(details, plan_id){
     var ob = JSON.stringify(details);
     ob = JSON.parse(details);
     var modal = $('#modal');
-    //var span = $('.close_modal')[0];
     var content = $('#modal_exercises_display');
     content.html("");
     var plan_info;

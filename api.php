@@ -46,7 +46,6 @@ switch($q){
 
 /**
  * retrieves the basic workout information for the home page
- * @param {String} sql connection 
  * @return {json} json string of workouts
  */
 function GetWorkoutPlans(){
@@ -56,7 +55,6 @@ function GetWorkoutPlans(){
 
 /**
  * retrieves the users
- * @param {String} sql connection 
  * @return {json} json string of users
  */
 function GetUsers(){
@@ -66,7 +64,6 @@ function GetUsers(){
 
 /**
  * retrieves the list of exercises
- * @param {String} sql connection 
  * @return {json} json string of exercises
  */
 function GetExercises(){
@@ -76,17 +73,15 @@ function GetExercises(){
 
 /**
  * retrieves the list of muscle groups
- * @param {String} sql connection 
  * @return {json} json string of muscle groups
  */
-function GetMuscleGroups(){//$con){
+function GetMuscleGroups(){
     $muscles = new Muscle_group();
     echo $muscles->select();
 }
 
 /**
  * submits workout
- * @param {String} sql connection 
  * @param {json} json string
  * @return
  */
@@ -98,7 +93,6 @@ function SubmitWorkout($workout_json){
 
 /**
  * submits exercise
- * @param {String} sql connection 
  * @param {Integer} muscle group id
  * @param {String} name of exercise
  * @return
@@ -112,7 +106,6 @@ function SubmitExercise($exercise_name, $muscle_id){
 
 /**
  * deletes specified workout
- * @param {String} sql connection 
  * @param {integer} plan id
  * @return
  */
@@ -124,7 +117,6 @@ function DeleteWorkout($plan_id){
 
 /**
  * notifies user by email 
- * @param {String} sql connection 
  * @param {integer} user id
  * @return
  */
@@ -136,7 +128,6 @@ function NotifyUser($user_id){
 
 /**
  * gets specified plan details
- * @param {String} sql connection 
  * @param {integer} user id
  * @return
  */
