@@ -1,45 +1,44 @@
 <?php
-    
+include_once "exercise.php";
+include_once "workout.php";
+include_once "muscle_group.php";
+include_once "user.php";
+
 $q = $_REQUEST["q"];
-    
-$con = mysqli_connect('localhost','root','root','Virtuagym');
-if (!$con) {
-    die('Could not connect: ' . mysqli_error($con));
-}
 
 switch($q){
     case "getPlans":
-        GetWorkoutPlans($con);
+        GetWorkoutPlans();
         break;
     case "getUsers":
-        GetUsers($con);
+        GetUsers();
         break;
     case "getExercises":
-        GetExercises($con);
+        GetExercises();
         break;
     case "getMuscleGroups":
-        GetMuscleGroups($con);
+        GetMuscleGroups();
         break;
     case "submitWorkout":
         $workout = $_POST['workout'];
-        SubmitWorkout($con, $workout);
+        SubmitWorkout($workout);
         break;
     case "submitExercise":
         $muscle_id = $_POST['muscle_id'];
         $exercise = $_POST['exercise'];
-        SubmitExercise($con, $muscle_id, $exercise);
+        SubmitExercise($exercise, $muscle_id);
         break;
     case "deleteWorkout":
         $plan_id = $_POST['plan_id'];
-        DeleteWorkout($con, $plan_id);
+        DeleteWorkout($plan_id);
         break;
     case "sendUserEmail":
         $user_id = $_POST['user_id'];
-        NotifyUser($con, $user_id);
+        NotifyUser($user_id);
         break;
     case "getPlanDetails":
         $plan_id = $_GET['plan_id'];
-        GetPlanDetails($con, $plan_id);
+        GetPlanDetails($plan_id);
         break;
     default:
         echo "INVALID PARAMS";
@@ -50,26 +49,9 @@ switch($q){
  * @param {String} sql connection 
  * @return {json} json string of workouts
  */
-function GetWorkoutPlans($con){
-    $sql = "SELECT workouts.name AS 'plan_name', workouts.id AS 'plan_id', GROUP_CONCAT(DISTINCT muscles.name) AS 'muscles' 
-FROM workout_exercises wk_exercise
-LEFT JOIN workouts 
-ON wk_exercise.plan_id = workouts.id
-LEFT JOIN exercises
-ON exercises.id = wk_exercise.exercise_id
-LEFT JOIN muscle_groups muscles
-ON muscles.id = exercises.muscle_group_id
-GROUP BY workouts.name, workouts.id";
-    
-    $arr = array();
-    if($result = mysqli_query($con, $sql)){
-        while($row = mysqli_fetch_assoc($result)) {
-            $arr[] = $row;
-        }
-        echo json_encode($arr);
-    }
-    
-    mysqli_close($con);
+function GetWorkoutPlans(){
+    $workout = new Workout();
+    echo $workout->select_plans();
 }
 
 /**
@@ -77,17 +59,9 @@ GROUP BY workouts.name, workouts.id";
  * @param {String} sql connection 
  * @return {json} json string of users
  */
-function GetUsers($con){
-    $sql = "SELECT id, concat(first_name,' ',last_name) AS name FROM users;";
-    $arr = array();
-    if($result = mysqli_query($con, $sql)){
-        while($row = mysqli_fetch_assoc($result)) {
-            $arr[] = $row;
-        }
-        echo json_encode($arr);
-    }
-
-    mysqli_close($con);
+function GetUsers(){
+    $user = new User();
+    echo $user->select();
 }
 
 /**
@@ -95,18 +69,9 @@ function GetUsers($con){
  * @param {String} sql connection 
  * @return {json} json string of exercises
  */
-function GetExercises($con){
-    $sql = "SELECT id, exercise_name FROM exercises;";
-    
-    $arr = array();
-    if($result = mysqli_query($con, $sql)){
-        while($row = mysqli_fetch_assoc($result)) {
-            $arr[] = $row;
-        }
-        echo json_encode($arr);
-    }
-    
-    mysqli_close($con);
+function GetExercises(){
+    $exercise = new Exercise();
+    echo $exercise->select();
 }
 
 /**
@@ -114,18 +79,9 @@ function GetExercises($con){
  * @param {String} sql connection 
  * @return {json} json string of muscle groups
  */
-function GetMuscleGroups($con){
-    $sql = "SELECT id, name FROM muscle_groups;";
-    
-    $arr = array();
-    if($result = mysqli_query($con, $sql)){
-        while($row = mysqli_fetch_assoc($result)) {
-            $arr[] = $row;
-        }
-        echo json_encode($arr);
-    }
-    
-    mysqli_close($con);
+function GetMuscleGroups(){//$con){
+    $muscles = new Muscle_group();
+    echo $muscles->select();
 }
 
 /**
@@ -134,20 +90,10 @@ function GetMuscleGroups($con){
  * @param {json} json string
  * @return
  */
-function SubmitWorkout($con, $workout_json){
-    $workout = json_decode($workout_json, true);
-    $sql = "INSERT INTO workouts (name) VALUES ('" . $workout['plan_name'] . "');";
-    $sql .= "INSERT INTO user_workouts (plan_id, user_id) VALUES (LAST_INSERT_ID(), " . $workout['user_id'] . ");";
-    
-    if(mysqli_multi_query($con, $sql)){
-        $new_plan_id = mysqli_insert_id($con);
-        //echo $new_plan_id;
-        SubmitWorkoutDays($con, $workout['days'], $new_plan_id);
-    }else{
-        echo "Error: " . $sql . "<br>" . mysqli_error($con); 
-        mysqli_close($con);
-    }
-  
+function SubmitWorkout($workout_json){
+    $new_workout = json_decode($workout_json, true);
+    $workout = Workout::create_workout($new_workout['plan_name'], $new_workout['user_id'], $new_workout['days']);
+    $workout->insert();
 }
 
 /**
@@ -157,46 +103,11 @@ function SubmitWorkout($con, $workout_json){
  * @param {String} name of exercise
  * @return
  */
-function SubmitExercise($con, $muscle_id, $exercise){
-    $sql = "INSERT INTO exercises (muscle_group_id, exercise_name) VALUES (" . $muscle_id . ", '" . $exercise ."');";
-    
-    if(mysqli_query($con, $sql)){
-        echo "Success!";
-    }else{
-        echo "Error: " . $sql . "<br>" . mysqli_error($con);  
-    }
-    mysqli_close($con);
-}
-
-/**
- * submits the days and exercises from the workout
- * @param {String} sql connection 
- * @param {json} json string
- * @param {integer} plan id
- * @return
- */
-function SubmitWorkoutDays($con, $days, $plan_id){
-    //must reset connection as it was losing scope
-    $con = mysqli_connect('localhost','root','root','Virtuagym');
-    $exercises = array();
-    
-    foreach($days as $day){
-        $name = $day['day_name']; 
-        $exercises = $day['exercises'];
-        
-        $sql = "INSERT INTO days (day_name, plan_id) VALUES ('".$name."',".$plan_id.");";
-
-        if(mysqli_query($con, $sql)){
-            $day_id = mysqli_insert_id($con);
-            $sql="INSERT INTO workout_exercises (exercise_id, plan_id, day_id) VALUES";
-            foreach($exercises as $exercise){
-                $sql.=" (".$exercise.",".$plan_id.",".$day_id."),";   
-            }
-            $sql = rtrim($sql,',') . ";";
-            mysqli_multi_query($con, $sql);
-        }
-    }
-    mysqli_close($con);
+function SubmitExercise($exercise_name, $muscle_id){
+    $exercise = new Exercise();
+    $exercise->set_name($exercise_name);
+    $exercise->set_muscle_group($muscle_id);
+    echo $exercise->insert();
 }
 
 /**
@@ -205,20 +116,10 @@ function SubmitWorkoutDays($con, $days, $plan_id){
  * @param {integer} plan id
  * @return
  */
-function DeleteWorkout($con, $plan_id){
-    //delete all traces of the plan
-    $sql = "DELETE FROM workout_exercises WHERE plan_id=".$plan_id.";";
-    $sql .= "DELETE FROM days WHERE plan_id=".$plan_id.";";
-    $sql .= "DELETE FROM user_workouts WHERE plan_id=".$plan_id.";";
-    $sql .= "DELETE FROM workouts WHERE id=".$plan_id.";";
-    
-    if(mysqli_multi_query($con, $sql)){
-        echo "Workout successfully removed.";
-    }else{
-        echo "Error: " . $sql . "<br>" . mysqli_error($con); 
-    }
-    
-    mysqli_close($con);
+function DeleteWorkout($plan_id){
+    $workout = new Workout();
+    $workout->set_id($plan_id);
+    echo $workout->delete();
 }
 
 /**
@@ -227,19 +128,10 @@ function DeleteWorkout($con, $plan_id){
  * @param {integer} user id
  * @return
  */
-function NotifyUser($con, $user_id){
-    $sql = "SELECT email FROM users WHERE id=".$user_id.";";
-    
-    if($result = mysqli_query($con, $sql)){
-        $row = mysqli_fetch_assoc($result);
-        $msg = "Your workout plan has been added! Thanks for using the site.\n -Virtuagym";
-        mail($row["email"], "New Workout Plan", $msg);
-        echo "An email has been sent to " . $row["email"];
-    }else{
-        echo "Error occurred.";   
-    }
-
-    mysqli_close($con);
+function NotifyUser($user_id){
+    $user = new User();
+    $user->set_id($user_id);
+    echo $user->notify_user();
 }
 
 /**
@@ -248,33 +140,9 @@ function NotifyUser($con, $user_id){
  * @param {integer} user id
  * @return
  */
-function GetPlanDetails($con, $plan_id){
-    $sql = "SELECT workouts.name, wk_exercise.exercise_id, wk_exercise.day_id, users.first_name, 
-             users.last_name, days.day_name, exercises.exercise_name
-            FROM workout_exercises wk_exercise
-            LEFT JOIN workouts 
-             ON wk_exercise.plan_id = workouts.id
-            LEFT JOIN user_workouts 
-             ON user_workouts.plan_id = workouts.id
-            LEFT JOIN users
-             ON users.id = user_workouts.user_id
-            LEFT JOIN exercises
-             ON exercises.id = wk_exercise.exercise_id
-            LEFT JOIN days
-             ON wk_exercise.day_id = days.id
-            WHERE workouts.id=".$plan_id."
-            ORDER BY days.id;"; 
-
-    $arr = array();
-    if($result = mysqli_query($con, $sql)){
-        while($row = mysqli_fetch_assoc($result)) {
-            $arr[] = $row;
-        }
-        echo json_encode($arr);
-    }else{
-        echo "Error: " . $sql . "<br>" . mysqli_error($con);    
-    }
-    
-    mysqli_close($con);
+function GetPlanDetails($plan_id){
+    $workout = new Workout();
+    $workout->set_id($plan_id);
+    echo $workout->select_plan_details();
 }
 ?>

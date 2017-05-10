@@ -359,8 +359,8 @@ var data = {
         });
     },
     submitExercise: function(muscle_group, exercise){
-        $.post('api.php?q=submitExercise', { muscle_id: muscle_group, exercise: exercise }, function(response) {
-            alert(exercise + " added to exercise options!");
+        $.post('api.php?q=submitExercise', { exercise: exercise, muscle_id: muscle_group }, function(response) {
+            alert(response);
             ResetExerciseForm();
             //refresh exercise list on plan entry form
             $('.exercise_selection').val([]);
